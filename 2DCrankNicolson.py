@@ -84,3 +84,17 @@ for k in range(0,N):
               B[i][j]=0.0
     AList[k]=A
     BList[k]=B
+XList=np.empty(N, dtype=object)
+YList=np.empty(N, dtype=object)
+for k in range(N-1,-1,-1):
+    XList[k]=np.identity(N)*0.0*1j
+    if(k==N-1):
+        XList[k]=np.identity(N)*0.0*1j
+    else:
+        XList[k]=np.linalg.inv(AList[k+1]-XList[k+1])*ax**2
+for k in range(0,N): 
+    YList[k]=np.identity(N)*0.0*1j
+    if(k==0):
+       YList[k]=np.identity(N)*0.0*1j 
+    else:
+       YList[k]=np.linalg.inv(AList[k-1]-YList[k-1])*ax**2 
