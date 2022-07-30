@@ -98,3 +98,14 @@ for k in range(0,N):
        YList[k]=np.identity(N)*0.0*1j 
     else:
        YList[k]=np.linalg.inv(AList[k-1]-YList[k-1])*ax**2 
+Ainv=np.empty([N, N], dtype=object)
+for j in range(0,N):
+    for i in range(0,N):
+        if(i==j):
+           Ainv[i][j]=np.linalg.inv(AList[i]-XList[i]-YList[i])
+        elif(i > j):
+           Ainv[i][j]=np.dot(ax*np.linalg.inv(AList[i]-XList[i]),Ainv[i-1][j])
+for j in range(0,N):
+     for i in range(N-1,-1,-1):
+        if(i < j):
+           Ainv[i][j]=np.dot(ax*np.linalg.inv(AList[i]-YList[i]),Ainv[i+1][j])
