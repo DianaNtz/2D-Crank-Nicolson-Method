@@ -63,3 +63,24 @@ for j in range(0,N):
        abx0[j]=np.sum(np.real(Psi2D[j,:]*np.conjugate(Psi2D[j,:])))*dy
 for i in range(0,N):
        aby0[i]=np.sum(np.real(Psi2D[:,i]*np.conjugate(Psi2D[:,i])))*dx
+AList=np.empty(N, dtype=object)
+BList=np.empty(N, dtype=object)
+for k in range(0,N):
+    A=np.identity(N)*0.0*1j
+    B=np.identity(N)*0.0*1j
+    for i in range(0,N):
+        for j in range(0,N):
+          if   (j==i):
+              A[i][j]=a2D[k][j]
+              B[i][j]=b2D[k][j]
+          elif (j==i+1):
+               A[i][j]=-ay
+               B[i][j]=ay
+          elif (j==i-1):
+              A[i][j]=-ay
+              B[i][j]=ay
+          else:
+              A[i][j]=0.0
+              B[i][j]=0.0
+    AList[k]=A
+    BList[k]=B
