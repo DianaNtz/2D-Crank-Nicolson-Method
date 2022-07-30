@@ -7,16 +7,17 @@ from mpl_toolkits import mplot3d
 from matplotlib import cm
 import os
 import imageio
+filenames = []
 hbar = 1.0545718e-34
-mass = 9.11e-31         # mass electron
-wx = 110*2*np.pi*1000   # freuquency in Hz
-wy = 110*2*np.pi*1000   # freuquency in Hz
-x0 = np.sqrt(hbar / (wx * mass)) # in m
-y0 = np.sqrt(hbar / (wy * mass)) # in m
-dt = 1e-8  # dt in s
-tfinal = 2*np.pi/wx # final time in s
+mass = 9.11e-31         #mass electron
+wx = 110*2*np.pi*1000   #freuquency in Hz
+wy = 110*2*np.pi*1000   #freuquency in Hz
+x0 = np.sqrt(hbar / (wx * mass)) #in m
+y0 = np.sqrt(hbar / (wy * mass)) #in m
+dt = 1e-8  #dt in s
+tfinal = 2*np.pi/wx #final time in s
 time_steps = int(np.round(tfinal/dt))
-t = 0.0  # initial time
+t = 0.0  #initial time
 N = 80
 xmax = 6.9 * x0
 xmin = -6.9 * x0
@@ -32,21 +33,21 @@ X, Y = np.meshgrid(x, y)
 Z=np.empty([N, N], dtype='double')
 ax = (1j * dt / hbar) * (hbar**2 / (mass * dx**2))*0.25
 ay = (1j * dt / hbar) * (hbar**2 / (mass * dy**2))*0.25
-Vy=0.5*wy**2*y**2*mass # 1D potential for y dimension
-Vx=0.5*wx**2*x**2*mass # 1D potential for x dimension
-# 1D wave functions for x dimension
+Vy=0.5*wy**2*y**2*mass #1D potential for y dimension
+Vx=0.5*wx**2*x**2*mass #1D potential for x dimension
+#1D wave functions for x dimension
 absalphax=2.5
 psicox=np.exp(-((x-x0*np.sqrt(2)*absalphax)/x0)**2/2)
 normcox=np.sum(psicox*np.conjugate(psicox))*dx
 psicox=psicox/np.sqrt(normcox)
-# 1D wave functions for y dimension
+#1D wave functions for y dimension
 psi0y=np.exp(-((y)/y0)**2/2)
 norm0y=np.sum(psi0y*np.conjugate(psi0y))*dy
 psi0y=psi0y/np.sqrt(norm0y)
 psi1y=np.exp(-((y)/y0)**2/2)*2*y/y0
 norm1y=np.sum(psi1y*np.conjugate(psi1y))*dy
 psi1y=psi1y/np.sqrt(norm1y)
-# Setting up 2D arrays for potential and wave function
+#Setting up 2D arrays for potential and wave function
 V2D=np.empty([N, N], dtype=complex)
 Psi2D=np.empty([N, N], dtype=complex)
 a2D=np.empty([N, N], dtype=complex)
@@ -123,7 +124,43 @@ for p in range(0,time_steps+1):
      for i in range(0,N):
         ka=Ainv[j][i].dot(BmalPsi2D[i])+ka
      Psi2D[j]=ka
+   if(p%10==0): 
+        print(p)
+        fig = plt.figure(figsize=(14,12))
+        axx = plt.axes(projection='3d')
+        for ii in range(0,N):
+             for jj in range(0,N):
+                Z[jj][ii]=np.real(Psi2D[ii][jj]*np.conjugate(Psi2D[ii][jj]))
+        axx.plot_surface(X*10**(3), Y*10**(3), Z/(10**6),cmap=cm.seismic,
+                         antialiased=False)
+        axx.contourf(X*10**(3), Y*10**(3), Z/(10**6),100, zdir='x', 
+                     offset=xmax*10**3,cmap=cm.binary)
+        axx.contourf(X*10**(3), Y*10**(3), Z/(10**6),100, zdir='y', 
+                     offset=ymin*10**3,cmap=cm.binary)
+        axx.view_init(azim=110,elev=15)
+        axx.set_xlabel('x in [mm]', labelpad=30,fontsize=24)
+        axx.set_ylabel('y in [mm]',labelpad=30,fontsize=24)
+        axx.set_ylim(ymin*10**3,ymax*10**3)
+        axx.set_xlim(xmin*10**3,xmax*10**3)
+        axx.set_zlabel('Probability density in [1/$(mm)^2$]',labelpad=40,fontsize=24)
+        stringtitle="t=".__add__(str(round(t*10**(6),1))).__add__(" $\mu$s")
+        plt.title(stringtitle,fontsize=35,x=0.5, y=0.95)
+        axx.set_zlim(0, 2500)
+        axx.zaxis.set_tick_params(labelsize=21,pad=18)
+        axx.yaxis.set_tick_params(labelsize=21)
+        axx.xaxis.set_tick_params(labelsize=21)
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        filename ='bla{0:.0f}.png'.format(p/10)
+        filenames.append(filename)    
+        plt.savefig(filename,dpi=300)
+        plt.close()
    t=t+dt
+with imageio.get_writer('2DCN.gif', mode='I') as writer:
+    for filename in filenames:
+        image = imageio.imread(filename)
+        writer.append_data(image)       
+for filename in set(filenames):
+    os.remove(filename)
 abx=np.empty(N,dtype=object)
 aby=np.empty(N,dtype=object)      
 for j in range(0,N):
