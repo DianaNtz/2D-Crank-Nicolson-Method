@@ -109,3 +109,18 @@ for j in range(0,N):
      for i in range(N-1,-1,-1):
         if(i < j):
            Ainv[i][j]=np.dot(ax*np.linalg.inv(AList[i]-YList[i]),Ainv[i+1][j])
+BmalPsi2D=np.empty([N, N], dtype=complex)
+for p in range(0,time_steps+1):        
+   for k in range(0,N):
+     if(k==0):
+        BmalPsi2D[k]=BList[k].dot(Psi2D[k])+ax*(Psi2D[k+1])
+     elif (k==N-1):
+        BmalPsi2D[k]=BList[k].dot(Psi2D[k])+ax*(Psi2D[k-1])
+     else:
+        BmalPsi2D[k]=ax*(Psi2D[k+1])+BList[k].dot(Psi2D[k])+ax*(Psi2D[k-1]) 
+   for j in range(0,N):
+     ka=0.0*1j
+     for i in range(0,N):
+        ka=Ainv[j][i].dot(BmalPsi2D[i])+ka
+     Psi2D[j]=ka
+   t=t+dt
