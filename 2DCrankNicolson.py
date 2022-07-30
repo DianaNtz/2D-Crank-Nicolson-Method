@@ -57,3 +57,9 @@ for i in range(0,N):
         Psi2D[i][j]=psicox[i]*1/np.sqrt(2)*(psi0y[j]+psi1y[j])
         a2D[i][j]=1.0 + 2.0 * ax + 2.0 * ay + 0.5*1j * dt / hbar * V2D[i][j]
         b2D[i][j]=1.0 - 2.0 * ax - 2.0 * ay - 0.5*1j * dt / hbar * V2D[i][j]
+abx0=np.empty(N,dtype=object)
+aby0=np.empty(N,dtype=object) 
+for j in range(0,N):
+       abx0[j]=np.sum(np.real(Psi2D[j,:]*np.conjugate(Psi2D[j,:])))*dy
+for i in range(0,N):
+       aby0[i]=np.sum(np.real(Psi2D[:,i]*np.conjugate(Psi2D[:,i])))*dx
