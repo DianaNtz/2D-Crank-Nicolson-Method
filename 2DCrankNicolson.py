@@ -124,3 +124,37 @@ for p in range(0,time_steps+1):
         ka=Ainv[j][i].dot(BmalPsi2D[i])+ka
      Psi2D[j]=ka
    t=t+dt
+abx=np.empty(N,dtype=object)
+aby=np.empty(N,dtype=object)      
+for j in range(0,N):
+       abx[j]=np.sum(np.real(Psi2D[j,:]*np.conjugate(Psi2D[j,:])))*dy
+for i in range(0,N):
+       aby[i]=np.sum(np.real(Psi2D[:,i]*np.conjugate(Psi2D[:,i])))*dx
+fig, ax1 = plt.subplots(1, sharex=True, figsize=(10,5))
+plt.plot(x/10**-3,abx0/10**(3), color='g',linestyle='-',
+         linewidth=3.0,label = "$|\psi(x,t_0)|^2$")
+plt.plot(x/10**-3,abx/10**(3), color='r',linestyle='-.',
+         linewidth=3.0,label = "$|\psi(x,t_{fianl})|^2$")
+plt.xlabel("Position in [mm]",rotation=0,fontsize=15)
+plt.ylabel(r'Probability density [1/mm]',fontsize=15)   
+plt.xticks(fontsize= 14)
+plt.yticks(fontsize= 14)      
+plt.xlim([xmin*10**3,xmax*10**3])
+plt.ylim([0,70])
+plt.legend(loc=2,fontsize=20)
+plt.savefig('x2D.pdf')
+plt.show()       
+fig, ax1 = plt.subplots(1, sharex=True, figsize=(10,5))
+plt.plot(y/10**-3,aby0/10**(3), color='b',linestyle='-',
+         linewidth=3.0,label = "$|\psi(y,t_0)|^2$")
+plt.plot(y/10**-3,aby/10**(3), color='r',linestyle='-.',
+         linewidth=3.0,label = "$|\psi(y,t_{fianl})|^2$")
+plt.xlabel("Position in [mm]",rotation=0,fontsize=15)
+plt.ylabel(r'Probability density [1/mm]',fontsize=15)   
+plt.xticks(fontsize= 14)
+plt.yticks(fontsize= 14)      
+plt.xlim([ymin*10**3,ymax*10**3])
+plt.ylim([0,80])
+plt.legend(loc=2,fontsize=20)
+plt.savefig('y2D.pdf')
+plt.show()
