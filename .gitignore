@@ -2,6 +2,6 @@ __pycache__/
 *.png
 *.gif
 *.pdf
-!y2D.pdf
-!x2D.pdf
+!y2D.png
+!x2D.png
 !2DCN.gif
