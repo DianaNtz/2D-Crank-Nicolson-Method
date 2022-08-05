@@ -1,5 +1,7 @@
 """
-@author: Diana Nitzschke
+The code below was written by @author: https://github.com/DianaNtz and is an 
+implementation of the 2D Crank Nicolson method. It solves in particular the 
+Schrödinger equation for the quantum harmonic oscillator.
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +10,7 @@ from matplotlib import cm
 import os
 import imageio
 filenames = []
+#some initial values
 hbar = 1.0545718e-34
 mass = 9.11e-31         #mass electron
 wx = 110*2*np.pi*1000   #freuquency in Hz
@@ -18,7 +21,7 @@ dt = 1e-8  #dt in s
 tfinal = 2*np.pi/wx #final time in s
 time_steps = int(np.round(tfinal/dt))
 t = 0.0  #initial time
-N = 80
+N = 80   #grid points
 xmax = 6.9 * x0
 xmin = -6.9 * x0
 ymax = 4.6 * y0
@@ -47,7 +50,7 @@ psi0y=psi0y/np.sqrt(norm0y)
 psi1y=np.exp(-((y)/y0)**2/2)*2*y/y0
 norm1y=np.sum(psi1y*np.conjugate(psi1y))*dy
 psi1y=psi1y/np.sqrt(norm1y)
-#Setting up 2D arrays for potential and wave function
+#setting up 2D arrays for potential and wave function
 V2D=np.empty([N, N], dtype=complex)
 Psi2D=np.empty([N, N], dtype=complex)
 a2D=np.empty([N, N], dtype=complex)
@@ -58,12 +61,14 @@ for i in range(0,N):
         Psi2D[i][j]=psicox[i]*1/np.sqrt(2)*(psi0y[j]+psi1y[j])
         a2D[i][j]=1.0 + 2.0 * ax + 2.0 * ay + 0.5*1j * dt / hbar * V2D[i][j]
         b2D[i][j]=1.0 - 2.0 * ax - 2.0 * ay - 0.5*1j * dt / hbar * V2D[i][j]
+#calculating initial probability density for x and y direction 
 abx0=np.empty(N,dtype=object)
 aby0=np.empty(N,dtype=object) 
 for j in range(0,N):
        abx0[j]=np.sum(np.real(Psi2D[j,:]*np.conjugate(Psi2D[j,:])))*dy
 for i in range(0,N):
        aby0[i]=np.sum(np.real(Psi2D[:,i]*np.conjugate(Psi2D[:,i])))*dx
+#initialising block matrices A and B
 AList=np.empty(N, dtype=object)
 BList=np.empty(N, dtype=object)
 for k in range(0,N):
@@ -85,6 +90,7 @@ for k in range(0,N):
               B[i][j]=0.0
     AList[k]=A
     BList[k]=B
+#invert matrix A blockwise with X and Y
 XList=np.empty(N, dtype=object)
 YList=np.empty(N, dtype=object)
 for k in range(N-1,-1,-1):
@@ -111,14 +117,17 @@ for j in range(0,N):
         if(i < j):
            Ainv[i][j]=np.dot(ax*np.linalg.inv(AList[i]-YList[i]),Ainv[i+1][j])
 BmalPsi2D=np.empty([N, N], dtype=complex)
-for p in range(0,time_steps+1):        
+#starting loop for time propagation
+for p in range(0,time_steps+1):
+   #multipy matrix B with psi        
    for k in range(0,N):
      if(k==0):
         BmalPsi2D[k]=BList[k].dot(Psi2D[k])+ax*(Psi2D[k+1])
      elif (k==N-1):
         BmalPsi2D[k]=BList[k].dot(Psi2D[k])+ax*(Psi2D[k-1])
      else:
-        BmalPsi2D[k]=ax*(Psi2D[k+1])+BList[k].dot(Psi2D[k])+ax*(Psi2D[k-1]) 
+        BmalPsi2D[k]=ax*(Psi2D[k+1])+BList[k].dot(Psi2D[k])+ax*(Psi2D[k-1])
+   #multipy inverse of A with BmalPsi2D
    for j in range(0,N):
      ka=0.0*1j
      for i in range(0,N):
@@ -126,6 +135,7 @@ for p in range(0,time_steps+1):
      Psi2D[j]=ka
    if(p%10==0): 
         print(p)
+        #creating a 2D probability density gif animation with imageio
         fig = plt.figure(figsize=(14,12))
         axx = plt.axes(projection='3d')
         for ii in range(0,N):
@@ -161,12 +171,14 @@ with imageio.get_writer('2DCN.gif', mode='I') as writer:
         writer.append_data(image)       
 for filename in set(filenames):
     os.remove(filename)
+#calculating final probability density for x and y direction 
 abx=np.empty(N,dtype=object)
 aby=np.empty(N,dtype=object)      
 for j in range(0,N):
        abx[j]=np.sum(np.real(Psi2D[j,:]*np.conjugate(Psi2D[j,:])))*dy
 for i in range(0,N):
        aby[i]=np.sum(np.real(Psi2D[:,i]*np.conjugate(Psi2D[:,i])))*dx
+#plotting initial vs final probability density for x and y direction
 fig, ax1 = plt.subplots(1, sharex=True, figsize=(10,5))
 plt.plot(x/10**-3,abx0/10**(3), color='g',linestyle='-',
          linewidth=3.0,label = "$|\psi(x,t_0)|^2$")
